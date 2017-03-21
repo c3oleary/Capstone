@@ -1,0 +1,143 @@
+---
+title: "Capstone Initial Results and Code"
+author: "Connell O'Leary"
+date: "March 20, 2017"
+output: word_document
+---
+```{r}
+setwd("C:/Users/Connell/Documents/R")
+df1 <- read.csv("Independent.Variables.Total.csv")
+
+```
+
+Correlation for Language Test Scores
+Grades 4&6, 6&8, 4&8
+```{r}
+cor(df1[,c(2,3)], use="complete.obs", method="pearson")
+cor(df1[,c(3,4)], use="complete.obs", method="pearson")
+cor(df1[,c(2,4)], use="complete.obs", method="pearson")
+```
+
+Correlation for Math Test Scores
+Grades 4&6, 6&8, 4&8
+```{r}
+cor(df1[,c(5,6)], use="complete.obs", method="pearson")
+cor(df1[,c(6,7)], use="complete.obs", method="pearson")
+cor(df1[,c(5,7)], use="complete.obs", method="pearson")
+```
+
+Assigning Colours for each Borough
+```{r}
+df1$color<- factor(df1$Borough, levels=c("Manhattan", "Bronx", "Brooklin", "Queens", "Staten Island"), labels=rainbow(5))
+```
+
+Visulaizing Correlations - corrgram
+```{r}
+library(corrgram)
+corrgram(df1[,2:3], order=TRUE, lower.panel=panel.shade, upper.panel=panel.pie, text.panel=panel.txt, 
+         main="NYC Grade 4 and Grade 6 Language Tests")
+corrgram(df1[,3:4], order=TRUE, lower.panel=panel.shade, upper.panel=panel.pie, text.panel=panel.txt, 
+         main="NYC Grade 6 and Grade 8 Language Tests")
+corrgram(df1[, c(2,4)], order=TRUE, lower.panel=panel.shade, upper.panel=panel.pie, text.panel=panel.txt, 
+         main="NYC Grade 4 and Grade 8 Language Tests")
+corrgram(df1[, 2:4], order=TRUE, lower.panel=panel.shade, upper.panel=panel.pie, text.panel=panel.txt, 
+         main="NYC Grades 4, 6 & 8 Language Tests")
+
+corrgram(df1[, 5:6], order=TRUE, lower.panel=panel.shade, upper.panel=panel.pie, text.panel=panel.txt, 
+         main="NYC Grade 4 and Grade 6 Math Tests")
+corrgram(df1[, 6:7], order=TRUE, lower.panel=panel.shade, upper.panel=panel.pie, text.panel=panel.txt, 
+         main="NYC Grade 6 and Grade 8 Math Tests")
+corrgram(df1[, c(5,7)], order=TRUE, lower.panel=panel.shade, upper.panel=panel.pie, text.panel=panel.txt, 
+         main="NYC Grade 4 and Grade 8 Math Tests")
+corrgram(df1[, 5:7], order=TRUE, lower.panel=panel.shade, upper.panel=panel.pie, text.panel=panel.txt, 
+         main="NYC Grades 4,6, & 8 Math Tests")
+```
+
+Scatter Plots for Language Correlation
+```{r}
+plot(df1$Grade.4.Language~df1$Grade.6.Language, main="Grade 4 and 6 Language Test Results Compared", 
+     xlab="Grade 4", ylab = "Grade 6", pch=16, col=as.character(df1$color))
+legend("topleft", pch=16, col=as.character(df1$color), legend=unique(df1$Borough), text.font = 1, cex = 0.75)
+abline(lm(df1$Grade.4.Language~df1$Grade.6.Language), col="black")
+
+plot(df1$Grade.6.Language~df1$Grade.8.Language, main="Grade 6 and 8 Language Test Results Compared", 
+     xlab="Grade 6", ylab = "Grade 8", pch=16, col=as.character(df1$color))
+legend("topleft", pch=16, col=as.character(df1$color), legend=unique(df1$Borough), text.font = 1, cex = 0.75)
+abline(lm(df1$Grade.6.Language~df1$Grade.8.Language), col="black")
+
+plot(df1$Grade.4.Language~df1$Grade.8.Language, main="Grade 4 and 8 Language Test Results Compared", 
+     xlab="Grade 4", ylab = "Grade 8", pch=16, col=as.character(df1$color))
+legend("topleft", pch=16, col=as.character(df1$color), legend=unique(df1$Borough), text.font = 1, cex = 0.75)
+abline(lm(df1$Grade.4.Language~df1$Grade.8.Language), col="black")
+
+pairs(df1[,c(2:4)], main="Language Test Results: Grades 4,6,& 8", col=as.character(df1$color), pch=16)
+```
+
+Scatter Plots for Math Correlation
+```{r}
+plot(df1$Grade.4.Math~df1$Grade.6.Math, main="Grade 4 and 6 Math Test Results Compared", 
+     xlab="Grade 4", ylab = "Grade 6", pch=16, col=as.character(df1$color))
+legend("topleft", pch=16, col=as.character(df1$color), legend=unique(df1$Borough), text.font = 1, cex = 0.75)
+abline(lm(df1$Grade.4.Math~df1$Grade.8.Math), col="black")
+
+plot(df1$Grade.6.Math~df1$Grade.8.Math, main="Grade 6 and 8 Math Test Results Compared", 
+     xlab="Grade 6", ylab = "Grade 8", pch=16, col=as.character(df1$color))
+legend("topleft", pch=16, col=as.character(df1$color), legend=unique(df1$Borough), text.font = 1, cex = 0.75)
+abline(lm(df1$Grade.6.Math~df1$Grade.8.Math), col="black")
+
+plot(df1$Grade.4.Math~df1$Grade.8.Math, main="Grade 4 and 8 Math Test Results Compared", 
+     xlab="Grade 4", ylab = "Grade 8", pch=16, col=as.character(df1$color))
+legend("topleft", pch=16, col=as.character(df1$color), legend=unique(df1$Borough), text.font = 1, cex = 0.75)
+abline(lm(df1$Grade.4.Math~df1$Grade.8.Math), col="black")
+
+pairs(df1[,c(5:7)], main="Math Test Results: Grades 4,6,& 8", col=as.character(df1$color), pch=16)
+```
+
+Multivariate Regression - Grade 4 and 2008 Class Size
+```{r}
+mod.grade4 <- lm(cbind(Grade.4.Language, Grade.4.Math)~Class.Size.2008, data = df1)
+mod.grade4
+summary(mod.grade4)
+```
+
+Multivariate Regression - Grade 6 and 2010 Class Size
+```{r}
+mod.grade6 <- lm(cbind(Grade.6.Language, Grade.6.Math)~Class.Size.2010, data = df1)
+mod.grade6
+summary(mod.grade6)
+```
+
+Multivariate Regression - Grade 8 and 2012 Class Size
+```{r}
+mod.grade8 <- lm(cbind(Grade.8.Language, Grade.8.Math)~Class.Size.2012, data = df1)
+mod.grade8
+summary(mod.grade8)
+```
+
+Stepwise Regression Grade 4
+```{r}
+lm(Grade.4.Language ~ Class.Size.2008 + Farmers.Markets.Days + Total.Wifi.Hotposts + Total.Libraries + Violent.Crimes+ Property.Crimes + Housing.Starts +
+Total.Businesses + Vocational.Courses, data=df1, direction="both")
+
+step(lm(Grade.4.Language ~ Class.Size.2008 + Total.Wifi.Hotposts + Total.Libraries, data=df1, direction="both"))
+step(lm(Grade.4.Language + Grade.4.Math ~ Class.Size.2008 + Total.Wifi.Hotposts + Total.Libraries, data=df1, direction="both"))
+```
+
+Stepwise Regression Grade 6
+```{r}
+lm(Grade.6.Language ~ Class.Size.2010 + Farmers.Markets.Days + Total.Wifi.Hotposts + Total.Libraries + Violent.Crimes+ Property.Crimes + Housing.Starts +
+Total.Businesses + Vocational.Courses, data=df1, direction="both")
+
+step(lm(Grade.6.Language ~ Class.Size.2010 + Total.Wifi.Hotposts + Total.Libraries, data=df1, direction="both"))
+step(lm(Grade.6.Language + Grade.6.Math ~ Class.Size.2010 + Total.Wifi.Hotposts + Total.Libraries, data=df1, direction="both"))
+```
+
+Stepwise Regression Grade 8
+```{r}
+lm(Grade.8.Language ~ Class.Size.2012 + Farmers.Markets.Days + Total.Wifi.Hotposts + Total.Libraries + Violent.Crimes+ Property.Crimes + Housing.Starts +
+Total.Businesses + Vocational.Courses, data=df1, direction="both")
+
+step(lm(Grade.8.Language ~ Class.Size.2012 + Total.Wifi.Hotposts + Total.Libraries, data=df1, direction="both"))
+step(lm(Grade.8.Language + Grade.8.Math ~ Class.Size.2012 + Total.Wifi.Hotposts + Total.Libraries, data=df1, direction="both"))
+```
+
